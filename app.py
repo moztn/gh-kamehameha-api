@@ -2,6 +2,8 @@ from flask import Flask
 from flask_restful import Resource, Api
 from gh_helpers import *
 
+import time
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -34,14 +36,23 @@ def clean_up(aRepos, aMembers):
   return repos, members
 
 def getGhData():
-  repos = getRepositories('moztn')
-  repos = add_langs_to_repos(repos)
-  leaders = get_leaders(repos)
-  members = get_org_members('moztn')
+  repoFetchThread = ReposThreadedFetch('moztn')
+  membersFetchThread = MembersThreadedFetch('moztn')
+
+  repoFetchThread.start()
+  membersFetchThread.start()
+
+  repoFetchThread.join()
+  membersFetchThread.join()
+
+  repos = get_repos()
+  leaders = get_leaders()
+  members = get_members()
+
   repos, members = clean_up(repos, members)
+
   global gh_data
   gh_data = {'repos':repos, 'leaders':leaders, 'members':members}
-  print "Number of access {0}".format(api_access)
 
 
 class GhData(Resource):

@@ -22,7 +22,8 @@ def clean_up(aRepos, aMembers):
       'html_url':r['html_url'],
       'watchers_count':r['watchers_count'],
       'open_issues_count':r['open_issues_count'],
-      'name':r['name']
+      'name':r['name'],
+      'lang':r['lang']
     }
     repos.append(rep)
 

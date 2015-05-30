@@ -163,7 +163,7 @@ class ReposThreadedFetch(threading.Thread):
     global repositories
     repositories = repos
 
-    langThread = LangThreadedFetch(repositories)
+    langThread = AddLangsThread(repositories)
     leadersThread = LeadersThreadedFetch(repositories)
 
     langThread.start()

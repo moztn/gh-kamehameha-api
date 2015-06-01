@@ -140,6 +140,7 @@ repositories = None
 members = None
 leaders = None
 
+
 def get_repos():
   global repositories
   return repositories
@@ -171,6 +172,8 @@ class ReposThreadedFetch(threading.Thread):
 
     leadersThread.join()
     langThread.join()
+    global repos_with_lang
+    repos_with_lang = []
 
 
 class MembersThreadedFetch(threading.Thread):

@@ -9,7 +9,11 @@ app = Flask(__name__)
 api = Api(app)
 
 
+# cached data
 gh_data = None
+can_update_cache = True
+
+cache_timeout = 50 # in seconds
 
 def clean_up(aRepos, aMembers):
   repos = []
@@ -37,6 +41,9 @@ def clean_up(aRepos, aMembers):
   return repos, members
 
 def getGhData():
+  global can_update_cache
+  can_update_cache = False
+
   repoFetchThread = ReposThreadedFetch('moztn')
   membersFetchThread = MembersThreadedFetch('moztn')
 
@@ -56,9 +63,21 @@ def getGhData():
   gh_data = {'repos':repos, 'leaders':leaders, 'members':members}
 
 
+class Timer(threading.Thread):
+  def __init__(self, seconds):
+    threading.Thread.__init__(self)
+    self.seconds = seconds
+
+  def run(self):
+    while True:
+      time.sleep(self.seconds)
+      global can_update_cache
+      can_update_cache = True
+
 class GhData(Resource):
   def get(self):
-    getGhData()
+    if(can_update_cache):
+      getGhData()
     return gh_data
 
 #TODO:
@@ -76,4 +95,6 @@ def after_request(response):
   return response
 
 if __name__ == '__main__':
+  timer = Timer(cache_timeout)
+  timer.start()
   app.run(debug=True)
